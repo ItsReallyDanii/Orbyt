@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
-
-
-
 :root {
-  --color-canvas-bg: #f4f5f8;
-  --color-panel-bg: #ffffff;
-  --color-border: #e2e4e9;
-  --color-text-primary: #1e293b;
-  --color-text-secondary: #64748b;
-  --color-accent: #6366f1;
+  --color-canvas-bg: #f5f7fb;
+  --color-canvas-gradient:
+    radial-gradient(circle at 20% 16%, rgba(125, 211, 252, 0.24), transparent 34%),
+    radial-gradient(circle at 85% 12%, rgba(167, 139, 250, 0.18), transparent 30%),
+    linear-gradient(135deg, #f8fafc 0%, #eef2ff 52%, #f5f7fb 100%);
+  
+  --color-panel-bg: rgba(255, 255, 255, 0.65);
+  --color-border: rgba(31, 41, 55, 0.12);
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #4b5563;
+  --color-accent: #0ea5e9;
   --color-shadow: rgba(15, 23, 42, 0.06);
   --ring-q1: #14b8a6;
   --ring-q2: #22c55e;
@@ -18,17 +20,24 @@
 }
 
 .dark {
-  --color-canvas-bg: #0f1115;
-  --color-panel-bg: #1c1f26;
-  --color-border: #2d3340;
+  --color-canvas-bg: #10121b;
+  --color-canvas-gradient:
+    radial-gradient(circle at 18% 18%, rgba(125, 211, 252, 0.22), transparent 32%),
+    radial-gradient(circle at 82% 12%, rgba(167, 139, 250, 0.18), transparent 30%),
+    linear-gradient(135deg, #0b1020 0%, #111827 52%, #181b29 100%);
+    
+  --color-panel-bg: rgba(24, 27, 41, 0.65);
+  --color-border: rgba(174, 180, 196, 0.22);
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #94a3b8;
-  --color-accent: #818cf8;
+  --color-accent: #38bdf8;
   --color-shadow: rgba(0, 0, 0, 0.4);
 }
 
 body {
   background-color: var(--color-canvas-bg);
+  background-image: var(--color-canvas-gradient);
+  background-attachment: fixed;
   color: var(--color-text-primary);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -40,4 +49,24 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* Glass effect for all panels using the panel-bg variable */
+[class*="bg-[var(--color-panel-bg)]"] {
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: 0 10px 40px -10px var(--color-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Specifically style Topbar and Sidebar which use bg-[var(--color-panel-bg)] */
+header[class*="bg-[var(--color-panel-bg)]"],
+aside[class*="bg-[var(--color-panel-bg)]"] {
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+}
+
+/* Style selected/hover items in Sidebar (which use bg-[var(--color-accent)]) */
+button[class*="bg-[var(--color-accent)]"] {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
