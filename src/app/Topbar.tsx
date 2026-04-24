@@ -11,8 +11,8 @@ const Topbar: React.FC<TopbarProps> = ({ toggleTheme, theme }) => {
       <div className="flex items-center gap-8">
         <nav className="flex items-center gap-2 text-sm font-medium">
           <button className="px-4 py-2 rounded-xl bg-[var(--color-canvas-bg)] text-[var(--color-accent)] shadow-sm border border-[var(--color-border)]">Annual</button>
-          <button className="px-4 py-2 rounded-xl hover:bg-[var(--color-canvas-bg)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">Month</button>
-          <button className="px-4 py-2 rounded-xl hover:bg-[var(--color-canvas-bg)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors">Day</button>
+          <button className="px-4 py-2 rounded-xl hover:bg-[var(--color-canvas-bg)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors" disabled title="Coming soon">Month</button>
+          <button className="px-4 py-2 rounded-xl hover:bg-[var(--color-canvas-bg)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors" disabled title="Coming soon">Day</button>
         </nav>
       </div>
       <div className="flex items-center gap-4">

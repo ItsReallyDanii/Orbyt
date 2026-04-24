@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { getDayOfYear, getDaysInYear } from '../core/time';
+import { getDayOfYear, getDaysInYear, formatDateStr } from '../core/time';
 import { 
-  fetchEntriesByDate, 
+  useEntriesByDate, 
   addEntry, 
   updateEntry,
   deleteEntry, 
@@ -17,14 +17,11 @@ interface InspectorProps {
   onViewModeChange: (mode: 'annual' | 'daily') => void;
 }
 
-const formatDateStr = (date: Date) => {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-};
 
 const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, viewMode, onViewModeChange }) => {
   const categories = useCategories();
   const dateStr = selectedDate ? formatDateStr(selectedDate) : '';
-  const entries = fetchEntriesByDate(dateStr);
+  const entries = useEntriesByDate(dateStr);
   
   const [activeForm, setActiveForm] = useState<"task" | "event" | "reminder" | "note" | null>(null);
   const [newTitle, setNewTitle] = useState("");
@@ -266,14 +263,16 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
                           setEditStartTime(entry.startTime || "");
                           setEditEndTime(entry.endTime || "");
                         }}
-                        className="opacity-0 group-hover:opacity-100 text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-opacity px-1"
+                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] focus:text-[var(--color-accent)] transition-opacity px-1 rounded"
+                        aria-label={`Edit: ${entry.title}`}
                         title="Edit"
                       >
                         ✎
                       </button>
                       <button 
                         onClick={() => deleteEntry(entry.id)}
-                        className="opacity-0 group-hover:opacity-100 text-[var(--color-text-secondary)] hover:text-red-500 transition-opacity px-1"
+                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-[var(--color-text-secondary)] hover:text-red-500 focus:text-red-500 transition-opacity px-1 rounded"
+                        aria-label={`Delete: ${entry.title}`}
                         title="Delete"
                       >
                         ✕

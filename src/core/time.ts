@@ -53,3 +53,9 @@ export function getDateFromAngle(angle: number, year: number): Date {
 //     getDaysInYear(2024) -> 366
 // - March 15 produces a valid angle:
 //     getDayOfYear(new Date(2024, 2, 15)) -> 75 -> getAngleForDate -> ~72.78 degrees
+
+/** Shared date formatter — produces YYYY-MM-DD from a Date object. */
+export function formatDateStr(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+

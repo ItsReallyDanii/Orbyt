@@ -79,15 +79,16 @@ export async function deleteEntry(id: string): Promise<void> {
   await db.entries.delete(id);
 }
 
-export function fetchEntriesByDate(dateStr: string) {
-  // Using dexie-react-hooks wrapper
+export function useEntriesByDate(dateStr: string) {
+  // useLiveQuery is a React hook — this function must be called inside a React component only
   return useLiveQuery(
     () => db.entries.where('startDate').equals(dateStr).toArray(),
     [dateStr]
   ) ?? [];
 }
 
-export function fetchEntriesByDateRange(startDateStr: string, endDateStr: string) {
+export function useEntriesByDateRange(startDateStr: string, endDateStr: string) {
+  // useLiveQuery is a React hook — this function must be called inside a React component only
   return useLiveQuery(
     () => db.entries.where('startDate').between(startDateStr, endDateStr, true, true).toArray(),
     [startDateStr, endDateStr]

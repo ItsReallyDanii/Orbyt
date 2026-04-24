@@ -1,13 +1,7 @@
 @import "tailwindcss";
 
-@theme {
-  --color-canvas-bg: var(--color-canvas-bg);
-  --color-panel-bg: var(--color-panel-bg);
-  --color-border: var(--color-border);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-accent: var(--color-accent);
-}
+
+
 
 :root {
   --color-canvas-bg: #f4f5f8;

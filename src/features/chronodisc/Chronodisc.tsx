@@ -9,21 +9,14 @@ import {
   getRingRadii 
 } from '../../core/radial';
 import { getAngleForDate, getDaysInYear, getDayOfYear, getDateFromDayOfYear } from '../../core/time';
-import { fetchEntriesByDateRange, useCategories } from '../../core/store';
+import { useEntriesByDateRange, useCategories } from '../../core/store';
+import { tailwindColors } from '../../core/colors';
 
 interface ChronodiscProps {
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
 }
 
-const tailwindColors: Record<string, string> = {
-  blue: '#3b82f6',
-  green: '#22c55e',
-  teal: '#14b8a6',
-  purple: '#a855f7',
-  yellow: '#eab308',
-  gray: '#6b7280'
-};
 
 const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) => {
   const today = new Date();
@@ -49,7 +42,7 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
   // Fetch entries for markers
   const startDateStr = `${year}-01-01`;
   const endDateStr = `${year}-12-31`;
-  const yearEntries = fetchEntriesByDateRange(startDateStr, endDateStr);
+  const yearEntries = useEntriesByDateRange(startDateStr, endDateStr);
   const categories = useCategories();
 
   const entriesByDay = React.useMemo(() => {
@@ -224,10 +217,10 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
           <circle cx="0" cy="0" r={centerRing.outer} className="fill-[var(--color-panel-bg)] stroke-[var(--color-border)] stroke-[0.5]" style={{ filter: 'drop-shadow(0 4px 12px var(--color-shadow))' }} />
           <circle cx="0" cy="0" r={centerRing.outer - 6} className="fill-none stroke-[var(--color-border)] stroke-[0.5]" strokeDasharray="3 3" />
           
-          <text x="0" y="-30" textAnchor="middle" className="fill-[var(--color-text-secondary)] text-[10px] uppercase tracking-widest font-semibold">Orbyt {year}</text>
-          <text x="0" y="-5" textAnchor="middle" className="fill-[var(--color-text-primary)] text-[15px] font-semibold">{targetFormatted}</text>
-          <text x="0" y="20" textAnchor="middle" className="fill-[var(--color-accent)] text-[24px] font-bold tracking-tight">{yearProgress}%</text>
-          <text x="0" y="35" textAnchor="middle" className="fill-[var(--color-text-secondary)] text-[8px] uppercase tracking-wider">Year Progress</text>
+          <text x="0" y="-30" textAnchor="middle" style={{ fontSize: '10px' }} className="fill-[var(--color-text-secondary)] uppercase tracking-widest font-semibold">Orbyt {year}</text>
+          <text x="0" y="-5" textAnchor="middle" style={{ fontSize: '14px' }} className="fill-[var(--color-text-primary)] font-semibold">{targetFormatted}</text>
+          <text x="0" y="20" textAnchor="middle" style={{ fontSize: '24px' }} className="fill-[var(--color-accent)] font-bold tracking-tight">{yearProgress}%</text>
+          <text x="0" y="35" textAnchor="middle" style={{ fontSize: '8px' }} className="fill-[var(--color-text-secondary)] uppercase tracking-wider">Year Progress</text>
         </g>
       </svg>
     </div>

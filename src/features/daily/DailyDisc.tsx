@@ -1,15 +1,9 @@
 import React from 'react';
-import { fetchEntriesByDate, useCategories } from '../../core/store';
+import { useEntriesByDate, useCategories } from '../../core/store';
+import { formatDateStr } from '../../core/time';
+import { tailwindColors } from '../../core/colors';
 import { describeRingSegment, polarToCartesian } from '../../core/radial';
 
-const tailwindColors: Record<string, string> = {
-  blue: '#3b82f6',
-  green: '#22c55e',
-  teal: '#14b8a6',
-  purple: '#a855f7',
-  yellow: '#eab308',
-  gray: '#6b7280'
-};
 
 interface DailyDiscProps {
   selectedDate: Date;
@@ -25,13 +19,10 @@ const getAngleForTime = (decimalHours: number) => {
   return decimalHours * (360 / 24);
 };
 
-const formatDateStr = (date: Date) => {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-};
 
 const DailyDisc: React.FC<DailyDiscProps> = ({ selectedDate }) => {
   const dateStr = formatDateStr(selectedDate);
-  const entries = fetchEntriesByDate(dateStr);
+  const entries = useEntriesByDate(dateStr);
   const categories = useCategories();
   
   const timedEntries = entries.filter(e => e.startTime);
@@ -127,8 +118,8 @@ const DailyDisc: React.FC<DailyDiscProps> = ({ selectedDate }) => {
           <g id="center-hub">
             <circle cx="0" cy="0" r={innerRadius} className="fill-[var(--color-panel-bg)] stroke-[var(--color-border)] stroke-[0.5]" style={{ filter: 'drop-shadow(0 4px 12px var(--color-shadow))' }} />
             <circle cx="0" cy="0" r={innerRadius - 6} className="fill-none stroke-[var(--color-border)] stroke-[0.5]" strokeDasharray="3 3" />
-            <text x="0" y="-10" textAnchor="middle" className="fill-[var(--color-text-secondary)] text-[10px] uppercase tracking-widest font-semibold">Daily View</text>
-            <text x="0" y="10" textAnchor="middle" className="fill-[var(--color-text-primary)] text-[14px] font-semibold">{formattedDate}</text>
+            <text x="0" y="-10" textAnchor="middle" style={{ fontSize: '10px' }} className="fill-[var(--color-text-secondary)] uppercase tracking-widest font-semibold">Daily View</text>
+            <text x="0" y="10" textAnchor="middle" style={{ fontSize: '13px' }} className="fill-[var(--color-text-primary)] font-semibold">{formattedDate}</text>
           </g>
         </svg>
       </div>
