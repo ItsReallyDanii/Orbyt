@@ -38,8 +38,8 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
 
   if (!selectedDate) {
     return (
-      <aside className="w-80 flex-shrink-0 bg-[var(--color-panel-bg)] border-l border-[var(--color-border)] p-6 overflow-y-auto flex flex-col items-center">
-        <div className="text-[var(--color-text-secondary)] text-center mt-12 p-6 border border-dashed border-[var(--color-border)] rounded-lg w-full">
+      <aside className="w-80 flex-shrink-0 bg-[var(--color-canvas-bg)] border-l border-[var(--color-border)] p-6 overflow-y-auto flex flex-col items-center">
+        <div className="text-[var(--color-text-secondary)] text-center mt-12 p-6 bg-[var(--color-panel-bg)] rounded-xl shadow-sm border border-[var(--color-border)] w-full">
           Select a day to inspect.
         </div>
         <button 
@@ -56,7 +56,6 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
   const dayOfYear = getDayOfYear(selectedDate);
   const daysInYear = getDaysInYear(year);
   const weekNumber = Math.ceil(dayOfYear / 7);
-  const month = selectedDate.toLocaleDateString('en-US', { month: 'long' });
   const quarter = Math.floor(selectedDate.getMonth() / 3) + 1;
   const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
   const formattedDate = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -101,9 +100,9 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
 
   const renderSection = (title: string, kind: "task" | "event" | "reminder" | "note", items: Entry[]) => {
     return (
-      <section>
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold text-[var(--color-text-primary)] capitalize">{title}</h3>
+      <section className="bg-[var(--color-panel-bg)] rounded-xl p-4 shadow-sm border border-[var(--color-border)] mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-semibold text-sm tracking-wide text-[var(--color-text-primary)] uppercase">{title}</h3>
           <button 
             onClick={() => {
               setActiveForm(kind);
@@ -163,7 +162,7 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
         )}
 
         {items.length === 0 ? (
-          <div className="p-3 border border-dashed border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-secondary)] text-center">
+          <div className="p-4 border border-dashed border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-secondary)] text-center bg-[var(--color-canvas-bg)]">
             No {title.toLowerCase()}
           </div>
         ) : (
@@ -172,12 +171,12 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
               const isEditing = editingEntryId === entry.id;
 
               return (
-              <li key={entry.id} className="flex flex-col gap-2 p-3 bg-[var(--color-canvas-bg)] border border-[var(--color-border)] rounded-lg group">
+              <li key={entry.id} className="flex flex-col gap-2 p-3 bg-[var(--color-canvas-bg)] border border-[var(--color-border)] rounded-lg group transition-shadow hover:shadow-sm">
                 <div className="flex items-start gap-3">
                   {kind === 'task' && !isEditing && (
                     <button 
                       onClick={() => toggleEntryStatus(entry.id, entry.status)}
-                      className={`mt-0.5 w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center
+                      className={`mt-0.5 w-4 h-4 rounded-md border flex-shrink-0 flex items-center justify-center transition-colors
                         ${entry.status === 'done' ? 'bg-[var(--color-accent)] border-[var(--color-accent)]' : 'border-[var(--color-border)] hover:border-[var(--color-accent)]'}
                       `}
                     >
@@ -291,37 +290,36 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
   };
 
   return (
-    <aside className="w-80 flex-shrink-0 bg-[var(--color-panel-bg)] border-l border-[var(--color-border)] p-6 overflow-y-auto">
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-[var(--color-text-primary)]">{dayOfWeek}</h2>
-        <p className="text-[var(--color-text-secondary)] text-sm mb-2">{formattedDate}</p>
+    <aside className="w-80 flex-shrink-0 bg-[var(--color-canvas-bg)] border-l border-[var(--color-border)] p-6 overflow-y-auto">
+      <div className="bg-[var(--color-panel-bg)] rounded-xl p-5 shadow-sm border border-[var(--color-border)] mb-6">
+        <h2 className="text-lg font-bold text-[var(--color-text-primary)]">{dayOfWeek}</h2>
+        <p className="text-[var(--color-text-secondary)] text-sm mb-4">{formattedDate}</p>
         
-        <div className="flex flex-wrap gap-2 text-xs text-[var(--color-text-secondary)] font-medium mt-3">
-          <span className="px-2 py-1 bg-[var(--color-canvas-bg)] rounded-md border border-[var(--color-border)]">Day {dayOfYear} of {daysInYear}</span>
-          <span className="px-2 py-1 bg-[var(--color-canvas-bg)] rounded-md border border-[var(--color-border)]">Week {weekNumber}</span>
+        <div className="flex flex-wrap gap-2 text-xs text-[var(--color-text-secondary)] font-medium">
+          <span className="px-2 py-1 bg-[var(--color-canvas-bg)] rounded-md border border-[var(--color-border)]">Day {dayOfYear}/{daysInYear}</span>
+          <span className="px-2 py-1 bg-[var(--color-canvas-bg)] rounded-md border border-[var(--color-border)]">Wk {weekNumber}</span>
           <span className="px-2 py-1 bg-[var(--color-canvas-bg)] rounded-md border border-[var(--color-border)]">Q{quarter}</span>
-          <span className="px-2 py-1 bg-[var(--color-canvas-bg)] rounded-md border border-[var(--color-border)]">{month}</span>
         </div>
       </div>
 
-      <div className="flex gap-2 w-full mb-8">
+      <div className="flex gap-2 w-full mb-6">
         <button 
           onClick={onGoToToday}
-          className="flex-1 px-4 py-2 bg-[var(--color-accent)] text-white rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
+          className="flex-1 px-4 py-2.5 bg-[var(--color-panel-bg)] shadow-sm border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-xl text-sm font-medium hover:bg-[var(--color-canvas-bg)] transition-colors"
         >
-          Go to Today
+          Today
         </button>
         {viewMode === 'annual' && (
           <button 
             onClick={() => onViewModeChange('daily')}
-            className="flex-1 px-4 py-2 bg-[var(--color-panel-bg)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-md text-sm font-medium hover:bg-[var(--color-canvas-bg)] transition-colors"
+            className="flex-1 px-4 py-2.5 bg-[var(--color-accent)] text-white shadow-sm rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
           >
             Daily View
           </button>
         )}
       </div>
 
-      <div className="space-y-6 pb-20">
+      <div className="space-y-4 pb-20">
         {renderSection("Tasks", "task", tasks)}
         {renderSection("Events", "event", events)}
         {renderSection("Reminders", "reminder", reminders)}

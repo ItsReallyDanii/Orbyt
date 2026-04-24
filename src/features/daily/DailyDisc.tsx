@@ -48,7 +48,8 @@ const DailyDisc: React.FC<DailyDiscProps> = ({ selectedDate }) => {
       <div className="w-full h-full max-w-3xl aspect-square flex items-center justify-center relative">
         <svg 
           viewBox="-320 -320 640 640" 
-          className="w-full h-full max-h-full max-w-full drop-shadow-sm"
+          className="w-full h-full max-h-full max-w-full"
+          style={{ filter: 'drop-shadow(0 20px 40px var(--color-shadow))' }}
         >
           <g id="daily-rings">
             {hours.map(h => {
@@ -124,16 +125,17 @@ const DailyDisc: React.FC<DailyDiscProps> = ({ selectedDate }) => {
 
           {/* Center Hub */}
           <g id="center-hub">
-            <circle cx="0" cy="0" r={innerRadius} className="fill-[var(--color-panel-bg)] stroke-[var(--color-border)] stroke-1" />
+            <circle cx="0" cy="0" r={innerRadius} className="fill-[var(--color-panel-bg)] stroke-[var(--color-border)] stroke-[0.5]" style={{ filter: 'drop-shadow(0 4px 12px var(--color-shadow))' }} />
+            <circle cx="0" cy="0" r={innerRadius - 6} className="fill-none stroke-[var(--color-border)] stroke-[0.5]" strokeDasharray="3 3" />
             <text x="0" y="-10" textAnchor="middle" className="fill-[var(--color-text-secondary)] text-[10px] uppercase tracking-widest font-semibold">Daily View</text>
-            <text x="0" y="10" textAnchor="middle" className="fill-[var(--color-text-primary)] text-[14px] font-medium">{formattedDate}</text>
+            <text x="0" y="10" textAnchor="middle" className="fill-[var(--color-text-primary)] text-[14px] font-semibold">{formattedDate}</text>
           </g>
         </svg>
       </div>
 
       {/* Adjacent Unscheduled Section */}
-      <div className="absolute right-0 top-0 bottom-0 w-64 bg-[var(--color-panel-bg)] border border-[var(--color-border)] rounded-lg shadow-md p-4 overflow-y-auto m-8">
-        <h3 className="font-semibold text-[var(--color-text-primary)] mb-4 pb-2 border-b border-[var(--color-border)]">Unscheduled</h3>
+      <div className="absolute right-0 top-0 bottom-0 w-64 bg-[var(--color-panel-bg)] border border-[var(--color-border)] rounded-2xl shadow-sm p-5 overflow-y-auto m-8">
+        <h3 className="font-semibold text-sm tracking-wide text-[var(--color-text-primary)] uppercase mb-4 pb-3 border-b border-[var(--color-border)]">Unscheduled</h3>
         {untimedEntries.length === 0 ? (
           <div className="text-sm text-[var(--color-text-secondary)] italic">
             No unscheduled items.

@@ -104,7 +104,8 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
     <div className="flex items-center justify-center w-full h-full relative p-4">
       <svg 
         viewBox="-300 -300 600 600" 
-        className="w-full h-full max-h-full max-w-full drop-shadow-sm"
+        className="w-full h-full max-h-full max-w-full"
+        style={{ filter: 'drop-shadow(0 20px 40px var(--color-shadow))' }}
       >
         <g id="chronodisc-rings">
           {/* Quarters */}
@@ -112,7 +113,8 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
             <path
               key={seg.id}
               d={describeRingSegment(0, 0, seg.innerRadius, seg.outerRadius, seg.startAngle, seg.endAngle)}
-              className={`${i % 2 === 0 ? 'fill-[var(--color-panel-bg)]' : 'fill-[var(--color-canvas-bg)]'} stroke-[var(--color-border)] stroke-[0.5] hover:opacity-80 transition-opacity`}
+              className="stroke-[var(--color-canvas-bg)] stroke-[1] hover:opacity-80 transition-opacity opacity-20"
+              style={{ fill: `var(--ring-q${i + 1})` }}
             />
           ))}
           {/* Months */}
@@ -120,7 +122,8 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
             <path
               key={seg.id}
               d={describeRingSegment(0, 0, seg.innerRadius, seg.outerRadius, seg.startAngle, seg.endAngle)}
-              className={`${i % 2 !== 0 ? 'fill-[var(--color-panel-bg)]' : 'fill-[var(--color-canvas-bg)]'} stroke-[var(--color-border)] stroke-[0.5] hover:opacity-80 transition-opacity`}
+              className="stroke-[var(--color-canvas-bg)] stroke-[1] hover:opacity-80 transition-opacity opacity-10"
+              style={{ fill: `var(--ring-q${Math.floor(i / 3) + 1})` }}
             />
           ))}
           {/* Weeks */}
@@ -218,12 +221,12 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
 
         {/* Center Hub */}
         <g id="center-hub">
-          <circle cx="0" cy="0" r={centerRing.outer} className="fill-[var(--color-panel-bg)] stroke-[var(--color-border)] stroke-1" />
-          <circle cx="0" cy="0" r={centerRing.outer - 4} className="fill-none stroke-[var(--color-border)] stroke-[0.5]" strokeDasharray="2 2" />
+          <circle cx="0" cy="0" r={centerRing.outer} className="fill-[var(--color-panel-bg)] stroke-[var(--color-border)] stroke-[0.5]" style={{ filter: 'drop-shadow(0 4px 12px var(--color-shadow))' }} />
+          <circle cx="0" cy="0" r={centerRing.outer - 6} className="fill-none stroke-[var(--color-border)] stroke-[0.5]" strokeDasharray="3 3" />
           
           <text x="0" y="-30" textAnchor="middle" className="fill-[var(--color-text-secondary)] text-[10px] uppercase tracking-widest font-semibold">Orbyt {year}</text>
-          <text x="0" y="-5" textAnchor="middle" className="fill-[var(--color-text-primary)] text-[14px] font-medium">{targetFormatted}</text>
-          <text x="0" y="20" textAnchor="middle" className="fill-[var(--color-accent)] text-[22px] font-bold">{yearProgress}%</text>
+          <text x="0" y="-5" textAnchor="middle" className="fill-[var(--color-text-primary)] text-[15px] font-semibold">{targetFormatted}</text>
+          <text x="0" y="20" textAnchor="middle" className="fill-[var(--color-accent)] text-[24px] font-bold tracking-tight">{yearProgress}%</text>
           <text x="0" y="35" textAnchor="middle" className="fill-[var(--color-text-secondary)] text-[8px] uppercase tracking-wider">Year Progress</text>
         </g>
       </svg>
