@@ -47,3 +47,14 @@ export type RingSchema = {
   outerRadius: number;
   visible: boolean;
 };
+
+export type Page = {
+  id: string;
+  title: string;
+  body: string;
+  /** Optional parentId — if set, this is a subnote of another page */
+  parentId?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+

@@ -15,10 +15,11 @@ import { tailwindColors } from '../../core/colors';
 interface ChronodiscProps {
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
+  onMonthFocus: (month: number) => void;
 }
 
 
-const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) => {
+const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect, onMonthFocus }) => {
   const today = new Date();
   const year = today.getFullYear();
   const daysInYear = getDaysInYear(year);
@@ -110,15 +111,22 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
               style={{ fill: `var(--ring-q${i + 1})` }}
             />
           ))}
-          {/* Months */}
-          {monthSegments.map((seg, i) => (
-            <path
-              key={seg.id}
-              d={describeRingSegment(0, 0, seg.innerRadius, seg.outerRadius, seg.startAngle, seg.endAngle)}
-              className="stroke-[var(--color-canvas-bg)] stroke-[1] hover:opacity-80 transition-opacity opacity-10"
-              style={{ fill: `var(--ring-q${Math.floor(i / 3) + 1})` }}
-            />
-          ))}
+          {/* Months — clickable to open month drilldown */}
+          {monthSegments.map((seg, i) => {
+            const monthIndex = i; // 0-indexed
+            const monthFullName = new Date(year, monthIndex, 1).toLocaleDateString('en-US', { month: 'long' });
+            return (
+              <path
+                key={seg.id}
+                d={describeRingSegment(0, 0, seg.innerRadius, seg.outerRadius, seg.startAngle, seg.endAngle)}
+                className="stroke-[var(--color-canvas-bg)] stroke-[1] hover:opacity-70 transition-opacity opacity-10 cursor-pointer"
+                style={{ fill: `var(--ring-q${Math.floor(i / 3) + 1})` }}
+                onClick={() => onMonthFocus(monthIndex)}
+              >
+                <title>Open {monthFullName}</title>
+              </path>
+            );
+          })}
           {/* Weeks */}
           {weekSegments.map((seg, i) => (
             <path
@@ -148,7 +156,9 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
                     const clickedDate = getDateFromDayOfYear(year, segDayOfYear);
                     onDateSelect(clickedDate);
                   }}
-                />
+                >
+                  <title>Select {getDateFromDayOfYear(year, segDayOfYear).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</title>
+                </path>
                 
                 {/* Entry Markers */}
                 {dayEntries.length > 0 && (() => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getDayOfYear, getDaysInYear, formatDateStr } from '../core/time';
+import type { ViewMode } from './AppShell';
 import { 
   useEntriesByDate, 
   addEntry, 
@@ -13,8 +14,8 @@ import type { Entry } from '../core/schema';
 interface InspectorProps {
   selectedDate: Date | null;
   onGoToToday: () => void;
-  viewMode: 'annual' | 'daily';
-  onViewModeChange: (mode: 'annual' | 'daily') => void;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }
 
 
@@ -308,8 +309,8 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday, 
         >
           Today
         </button>
-        {viewMode === 'annual' && (
-          <button 
+        {(viewMode === 'annual' || viewMode === 'month') && (
+          <button
             onClick={() => onViewModeChange('daily')}
             className="flex-1 px-4 py-2.5 bg-[var(--color-accent)] text-white shadow-sm rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
           >

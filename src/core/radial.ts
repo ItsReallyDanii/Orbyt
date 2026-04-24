@@ -268,3 +268,81 @@ export function getDaySegments(year: number): Array<Segment> {
 
   return segments;
 }
+
+/**
+ * Returns day segments for a single month, each occupying an equal 360/daysInMonth arc.
+ * Used by MonthDisc to render focused monthly view.
+ * @param year - full year number
+ * @param month - 0-indexed month (0 = January)
+ */
+export function getMonthDaySegments(year: number, month: number): Array<Segment> {
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const innerRadius = 135;
+  const outerRadius = 260;
+  const segments: Segment[] = [];
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const startAngle = ((day - 1) / daysInMonth) * 360;
+    const endAngle = (day / daysInMonth) * 360;
+    const date = new Date(year, month, day);
+
+    segments.push({
+      id: `mday-${year}-${month + 1}-${day}`,
+      label: String(day),
+      startDate: formatDate(date),
+      endDate: formatDate(date),
+      startAngle,
+      endAngle,
+      innerRadius,
+      outerRadius,
+    });
+  }
+
+  // suppress unused var warning
+  void firstDay;
+  return segments;
+}
+
+/**
+ * Returns week segments for a single month, each spanning 7 days (or remaining days).
+ * Used by MonthDisc for week subdivision arcs.
+ * @param year - full year number
+ * @param month - 0-indexed month (0 = January)
+ */
+export function getMonthWeekSegments(year: number, month: number): Array<Segment> {
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const innerRadius = 90;  // between center hub and day ring
+  const outerRadius = 130;
+  const segments: Segment[] = [];
+
+  let day = 1;
+  let weekNum = 1;
+  while (day <= daysInMonth) {
+    const weekDays = Math.min(7, daysInMonth - day + 1);
+    const startAngle = ((day - 1) / daysInMonth) * 360;
+    const endAngle = ((day - 1 + weekDays) / daysInMonth) * 360;
+
+    const startDate = new Date(year, month, day);
+    const endDate = new Date(year, month, day + weekDays - 1);
+
+    segments.push({
+      id: `mweek-${year}-${month + 1}-${weekNum}`,
+      label: `W${weekNum}`,
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate),
+      startAngle,
+      endAngle,
+      innerRadius,
+      outerRadius,
+    });
+
+    day += weekDays;
+    weekNum++;
+  }
+
+  return segments;
+}
+

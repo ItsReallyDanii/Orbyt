@@ -1,18 +1,27 @@
 import Dexie, { type Table } from 'dexie';
 import { useLiveQuery } from 'dexie-react-hooks';
-import type { Disc, Entry, Category } from './schema';
+import type { Disc, Entry, Category, Page } from './schema';
 
 export class OrbytDatabase extends Dexie {
   discs!: Table<Disc, string>;
   entries!: Table<Entry, string>;
   categories!: Table<Category, string>;
+  pages!: Table<Page, string>;
 
   constructor() {
     super('OrbytDatabase');
+    // version(1): original schema — discs, entries, categories
     this.version(1).stores({
       discs: 'id, year',
       entries: 'id, discId, categoryId, startDate, status',
       categories: 'id, name',
+    });
+    // version(2): add pages table for local Pages/Subnotes workspace
+    this.version(2).stores({
+      discs: 'id, year',
+      entries: 'id, discId, categoryId, startDate, status',
+      categories: 'id, name',
+      pages: 'id, parentId, updatedAt',
     });
   }
 }
@@ -103,3 +112,70 @@ export async function toggleEntryStatus(id: string, currentStatus: Entry["status
   const nextStatus = currentStatus === "open" ? "done" : "open";
   await updateEntry(id, { status: nextStatus });
 }
+
+// ─── Page helpers ───────────────────────────────────────────────────────────
+
+export async function addPage(data: { title: string; body?: string; parentId?: string }): Promise<string> {
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  await db.pages.add({
+    id,
+    title: data.title.trim() || 'Untitled',
+    body: data.body ?? '',
+    parentId: data.parentId,
+    createdAt: now,
+    updatedAt: now,
+  });
+  return id;
+}
+
+export async function updatePage(id: string, changes: Partial<Pick<Page, 'title' | 'body' | 'parentId'>>): Promise<void> {
+  await db.pages.update(id, {
+    ...changes,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+export async function deletePage(id: string): Promise<void> {
+  // Also delete all subnotes of this page
+  const children = await db.pages.where('parentId').equals(id).toArray();
+  const childIds = children.map(c => c.id);
+  await db.pages.bulkDelete([id, ...childIds]);
+}
+
+/** Returns all top-level pages (no parentId), sorted by updatedAt desc */
+export function usePages() {
+  return useLiveQuery(
+    () => db.pages.filter(p => !p.parentId).sortBy('updatedAt').then(arr => arr.reverse()),
+  ) ?? [];
+}
+
+/** Returns direct children (subnotes) of a given page, sorted by updatedAt desc */
+export function useChildPages(parentId: string) {
+  return useLiveQuery(
+    () => db.pages.where('parentId').equals(parentId).sortBy('updatedAt').then(arr => arr.reverse()),
+    [parentId],
+  ) ?? [];
+}
+
+/** Returns all entries for today for Review panel */
+export function useTodayEntries() {
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  return useLiveQuery(() => db.entries.where('startDate').equals(dateStr).toArray(), [dateStr]) ?? [];
+}
+
+/** Returns total entry count for the year for Review panel */
+export function useYearEntryCount() {
+  const year = new Date().getFullYear();
+  return useLiveQuery(
+    () => db.entries.where('startDate').between(`${year}-01-01`, `${year}-12-31`, true, true).count(),
+    [year],
+  ) ?? 0;
+}
+
+/** Returns count of done tasks for Review panel */
+export function useDoneTaskCount() {
+  return useLiveQuery(() => db.entries.where('status').equals('done').count()) ?? 0;
+}
+

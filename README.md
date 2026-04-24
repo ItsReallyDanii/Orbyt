@@ -40,7 +40,9 @@ At the core of Orbyt is the **Chronodisc**—an interactive SVG-based annual rad
 - **No Notifications/Alarms**: The app relies on your active interaction.
 
 ## Known Limitations
-- The "Month" and "Day" buttons in the top navigation bar are currently visual/navigation placeholders.
-- The implemented drilldown path is strictly: `Select Day on Annual Disc -> Click "Daily View" in Inspector`.
-- Month, week, and quarter zoom modes are planned for future development.
+- The "Day" button in the top navigation bar requires a date to be selected first.
+- **v10.1:** Month drilldown is now implemented — clicking a month ring opens a focused MonthDisc.
+- The implemented drilldown path is: `Annual → Month (click ring) → Select Day → Daily View from Inspector/Topbar`.
+- Quarter and Week zoom modes remain future work.
 - The Daily Drilldown view does not elegantly wrap timed events that cross the midnight boundary.
+- The app is desktop-first; touch interactions work but are not optimized.
