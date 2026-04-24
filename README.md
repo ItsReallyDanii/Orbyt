@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# Orbyt
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Orbyt** is a local-first radial planning and self-organization system. It reimagines the traditional calendar as a series of concentric, temporal rings. The system focuses on visual density, giving you an at-a-glance understanding of how your tasks, events, and focus time are distributed across the year, month, or day.
 
-Currently, two official plugins are available:
+## The Chronodisc
+At the core of Orbyt is the **Chronodisc**—an interactive SVG-based annual radial dial. It represents time as a physical wheel. The outer ring is divided into quarters, then months, then weeks, and finally days on the inner ring. You can rotate and click into any day to see its specific contents and seamlessly drill down into a 24-hour circular dial for deep daily planning.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Installation
 
-## React Compiler
+1. Ensure you have Node.js installed.
+2. Clone this repository.
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## How to Run
 
-## Expanding the ESLint configuration
+1. Start the local development server:
+   ```bash
+   npm run dev
+   ```
+2. Open your browser to `http://localhost:5173/`.
+3. To build the project for production, run:
+   ```bash
+   npm run build
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Current Features
+- **Annual Chronodisc**: A zoomable, clickable 365-day SVG radial dial.
+- **Daily Drilldown**: A 24-hour radial view that visually plots tasks by their start and end times.
+- **Local-First Persistence**: All data is stored instantly in your browser via Dexie/IndexedDB. Your data stays on your machine.
+- **Inspector Region**: A side-panel interface to quickly create, edit, delete, and mark tasks or events.
+- **Visual Markers**: Entries created in the Inspector immediately show up as color-coded dots on the Chronodisc.
+- **Premium Themes**: Full support for light and dark modes with a carefully crafted, Apple-clean aesthetic.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Current Non-Features
+- **No Cloud Sync**: There is no user login or backend server syncing your data.
+- **No Google Calendar / Duckbill**: While stubs exist in the codebase for future integrations, Orbyt currently does not fetch live data from any external APIs.
+- **No Notifications/Alarms**: The app relies on your active interaction.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Known Limitations
+- The "Month" and "Day" buttons in the top navigation bar are currently visual/navigation placeholders.
+- The implemented drilldown path is strictly: `Select Day on Annual Disc -> Click "Daily View" in Inspector`.
+- Month, week, and quarter zoom modes are planned for future development.
+- The Daily Drilldown view does not elegantly wrap timed events that cross the midnight boundary.
