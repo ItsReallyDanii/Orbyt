@@ -3,6 +3,7 @@ import { getDayOfYear, getDaysInYear } from '../core/time';
 import { 
   fetchEntriesByDate, 
   addEntry, 
+  updateEntry,
   deleteEntry, 
   toggleEntryStatus,
   useCategories
@@ -25,6 +26,9 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday }
   
   const [activeForm, setActiveForm] = useState<"task" | "event" | "reminder" | "note" | null>(null);
   const [newTitle, setNewTitle] = useState("");
+
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
 
   if (!selectedDate) {
     return (
@@ -126,9 +130,12 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday }
           </div>
         ) : (
           <ul className="space-y-2">
-            {items.map(entry => (
+            {items.map(entry => {
+              const isEditing = editingEntryId === entry.id;
+
+              return (
               <li key={entry.id} className="flex items-start gap-3 p-3 bg-[var(--color-canvas-bg)] border border-[var(--color-border)] rounded-lg group">
-                {kind === 'task' && (
+                {kind === 'task' && !isEditing && (
                   <button 
                     onClick={() => toggleEntryStatus(entry.id, entry.status)}
                     className={`mt-0.5 w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center
@@ -139,19 +146,70 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday }
                   </button>
                 )}
                 
-                <div className={`flex-1 text-sm ${entry.status === 'done' ? 'text-[var(--color-text-secondary)] line-through' : 'text-[var(--color-text-primary)]'}`}>
-                  {entry.title}
-                </div>
-                
-                <button 
-                  onClick={() => deleteEntry(entry.id)}
-                  className="opacity-0 group-hover:opacity-100 text-[var(--color-text-secondary)] hover:text-red-500 transition-opacity px-1"
-                  title="Delete"
-                >
-                  ✕
-                </button>
+                {isEditing ? (
+                  <div className="flex-1 flex gap-2 w-full">
+                    <input
+                      autoFocus
+                      className="flex-1 bg-[var(--color-panel-bg)] border border-[var(--color-border)] rounded px-2 py-1 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
+                      value={editTitle}
+                      onChange={e => setEditTitle(e.target.value)}
+                      onKeyDown={async e => {
+                        if (e.key === 'Enter') {
+                          if (editTitle.trim()) {
+                            await updateEntry(entry.id, { title: editTitle.trim() });
+                          }
+                          setEditingEntryId(null);
+                        }
+                        if (e.key === 'Escape') {
+                          setEditingEntryId(null);
+                        }
+                      }}
+                    />
+                    <button 
+                      onClick={async () => {
+                        if (editTitle.trim()) {
+                          await updateEntry(entry.id, { title: editTitle.trim() });
+                        }
+                        setEditingEntryId(null);
+                      }}
+                      className="px-2 py-1 bg-[var(--color-accent)] text-white text-xs rounded hover:opacity-90"
+                    >
+                      Save
+                    </button>
+                    <button 
+                      onClick={() => setEditingEntryId(null)}
+                      className="px-2 py-1 bg-[var(--color-panel-bg)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-xs rounded hover:opacity-90"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className={`flex-1 text-sm ${entry.status === 'done' ? 'text-[var(--color-text-secondary)] line-through' : 'text-[var(--color-text-primary)]'}`}>
+                      {entry.title}
+                    </div>
+                    
+                    <button 
+                      onClick={() => {
+                        setEditingEntryId(entry.id);
+                        setEditTitle(entry.title);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-opacity px-1"
+                      title="Edit"
+                    >
+                      ✎
+                    </button>
+                    <button 
+                      onClick={() => deleteEntry(entry.id)}
+                      className="opacity-0 group-hover:opacity-100 text-[var(--color-text-secondary)] hover:text-red-500 transition-opacity px-1"
+                      title="Delete"
+                    >
+                      ✕
+                    </button>
+                  </>
+                )}
               </li>
-            ))}
+            )})}
           </ul>
         )}
       </section>
