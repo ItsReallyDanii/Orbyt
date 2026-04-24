@@ -6,6 +6,7 @@ import InspectorRegion from './InspectorRegion';
 
 const AppShell: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -25,8 +26,8 @@ const AppShell: React.FC = () => {
       <div className="flex flex-col flex-1 min-w-0">
         <Topbar toggleTheme={toggleTheme} theme={theme} />
         <div className="flex flex-1 overflow-hidden">
-          <MainCanvas />
-          <InspectorRegion />
+          <MainCanvas selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          <InspectorRegion selectedDate={selectedDate} onGoToToday={() => setSelectedDate(new Date())} />
         </div>
       </div>
     </div>
