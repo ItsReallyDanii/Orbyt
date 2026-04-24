@@ -94,6 +94,10 @@ export function fetchEntriesByDateRange(startDateStr: string, endDateStr: string
   ) ?? [];
 }
 
+export function useCategories() {
+  return useLiveQuery(() => db.categories.toArray()) ?? [];
+}
+
 export async function toggleEntryStatus(id: string, currentStatus: Entry["status"]): Promise<void> {
   const nextStatus = currentStatus === "open" ? "done" : "open";
   await updateEntry(id, { status: nextStatus });

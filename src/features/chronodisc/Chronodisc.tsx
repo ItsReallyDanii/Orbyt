@@ -9,15 +9,24 @@ import {
   getRingRadii 
 } from '../../core/radial';
 import { getAngleForDate, getDaysInYear, getDayOfYear, getDateFromDayOfYear } from '../../core/time';
+import { fetchEntriesByDateRange, useCategories } from '../../core/store';
 
 interface ChronodiscProps {
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
 }
 
+const tailwindColors: Record<string, string> = {
+  blue: '#3b82f6',
+  green: '#22c55e',
+  teal: '#14b8a6',
+  purple: '#a855f7',
+  yellow: '#eab308',
+  gray: '#6b7280'
+};
+
 const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) => {
   const today = new Date();
-  // Using today's year for the disc itself
   const year = today.getFullYear();
   const daysInYear = getDaysInYear(year);
   
@@ -36,6 +45,24 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
   const centerRing = getRingRadii("center");
 
   const targetFormatted = targetDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  // Fetch entries for markers
+  const startDateStr = `${year}-01-01`;
+  const endDateStr = `${year}-12-31`;
+  const yearEntries = fetchEntriesByDateRange(startDateStr, endDateStr);
+  const categories = useCategories();
+
+  const entriesByDay = React.useMemo(() => {
+    const map = new Map<number, typeof yearEntries>();
+    yearEntries.forEach(entry => {
+      const [y, m, d] = entry.startDate.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      const doy = getDayOfYear(dateObj);
+      if (!map.has(doy)) map.set(doy, []);
+      map.get(doy)!.push(entry);
+    });
+    return map;
+  }, [yearEntries]);
 
   const renderLabels = (segments: any[], radiusOffset: number, fontSize: number, rotateText: boolean) => {
     return segments.map((seg, i) => {
@@ -106,26 +133,49 @@ const Chronodisc: React.FC<ChronodiscProps> = ({ selectedDate, onDateSelect }) =
           ))}
           {/* Days */}
           {daySegments.map((seg, i) => {
-            // Reconstruct the date from the segment to pass back on click
-            // segment.id is "day-YYYY-DayOfYear"
             const parts = seg.id.split('-');
             const segDayOfYear = parseInt(parts[2], 10);
             const isSelected = selectedDate && getDayOfYear(selectedDate) === segDayOfYear && selectedDate.getFullYear() === year;
             
+            const dayEntries = entriesByDay.get(segDayOfYear) || [];
+
             return (
-              <path
-                key={seg.id}
-                d={describeRingSegment(0, 0, seg.innerRadius, seg.outerRadius, seg.startAngle, seg.endAngle)}
-                className={`
-                  ${isSelected ? 'fill-[var(--color-accent)] opacity-20' : i % 2 !== 0 ? 'fill-[var(--color-panel-bg)]' : 'fill-[var(--color-canvas-bg)]'} 
-                  ${isSelected ? 'stroke-[var(--color-accent)] stroke-[1]' : 'stroke-[var(--color-border)] stroke-[0.25]'}
-                  hover:fill-[var(--color-accent)] hover:opacity-30 cursor-pointer transition-all
-                `}
-                onClick={() => {
-                  const clickedDate = getDateFromDayOfYear(year, segDayOfYear);
-                  onDateSelect(clickedDate);
-                }}
-              />
+              <g key={seg.id}>
+                <path
+                  d={describeRingSegment(0, 0, seg.innerRadius, seg.outerRadius, seg.startAngle, seg.endAngle)}
+                  className={`
+                    ${isSelected ? 'fill-[var(--color-accent)] opacity-20' : i % 2 !== 0 ? 'fill-[var(--color-panel-bg)]' : 'fill-[var(--color-canvas-bg)]'} 
+                    ${isSelected ? 'stroke-[var(--color-accent)] stroke-[1]' : 'stroke-[var(--color-border)] stroke-[0.25]'}
+                    hover:fill-[var(--color-accent)] hover:opacity-30 cursor-pointer transition-all
+                  `}
+                  onClick={() => {
+                    const clickedDate = getDateFromDayOfYear(year, segDayOfYear);
+                    onDateSelect(clickedDate);
+                  }}
+                />
+                
+                {/* Entry Markers */}
+                {dayEntries.length > 0 && (() => {
+                  const middleAngle = seg.startAngle + (seg.endAngle - seg.startAngle) / 2;
+                  const displayEntries = dayEntries.slice(0, 3);
+                  
+                  return displayEntries.map((entry, idx) => {
+                    const cat = categories.find(c => c.id === entry.categoryId);
+                    const hexColor = tailwindColors[cat?.color || 'gray'] || tailwindColors.gray;
+                    const rOffset = seg.outerRadius - 4 - (idx * 4); // Stack inwards
+                    const pt = polarToCartesian(0, 0, rOffset, middleAngle);
+                    
+                    return (
+                      <circle 
+                        key={entry.id}
+                        cx={pt.x} cy={pt.y} r={1.2}
+                        fill={hexColor}
+                        className="pointer-events-none"
+                      />
+                    );
+                  });
+                })()}
+              </g>
             );
           })}
         </g>

@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getDayOfYear, getDaysInYear } from '../core/time';
+import { 
+  fetchEntriesByDate, 
+  addEntry, 
+  deleteEntry, 
+  toggleEntryStatus,
+  useCategories
+} from '../core/store';
+import type { Entry } from '../core/schema';
 
 interface InspectorProps {
   selectedDate: Date | null;
   onGoToToday: () => void;
 }
 
+const formatDateStr = (date: Date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
 const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday }) => {
+  const categories = useCategories();
+  const dateStr = selectedDate ? formatDateStr(selectedDate) : '';
+  const entries = fetchEntriesByDate(dateStr);
+  
+  const [activeForm, setActiveForm] = useState<"task" | "event" | "reminder" | "note" | null>(null);
+  const [newTitle, setNewTitle] = useState("");
+
   if (!selectedDate) {
     return (
       <aside className="w-80 flex-shrink-0 bg-[var(--color-panel-bg)] border-l border-[var(--color-border)] p-6 overflow-y-auto flex flex-col items-center">
@@ -32,6 +51,113 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday }
   const dayOfWeek = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
   const formattedDate = selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
+  const tasks = entries.filter(e => e.kind === 'task');
+  const events = entries.filter(e => e.kind === 'event');
+  const reminders = entries.filter(e => e.kind === 'reminder');
+  const notes = entries.filter(e => e.kind === 'note');
+
+  const handleAddEntry = async (kind: "task" | "event" | "reminder" | "note") => {
+    if (!newTitle.trim()) {
+      setActiveForm(null);
+      return;
+    }
+    
+    // Auto-map category based on kind for simplicity
+    let categoryId = categories[0]?.id || "";
+    const matchedCat = categories.find(c => 
+      (kind === "task" && c.name === "Work") ||
+      (kind === "event" && c.name === "Events") ||
+      (kind === "reminder" && c.name === "Reminders") ||
+      (kind === "note" && c.name === "Personal")
+    );
+    if (matchedCat) categoryId = matchedCat.id;
+
+    await addEntry({
+      discId: `disc-${year}`,
+      title: newTitle.trim(),
+      kind,
+      categoryId,
+      startDate: dateStr,
+      status: "open",
+    });
+    
+    setNewTitle("");
+    setActiveForm(null);
+  };
+
+  const renderSection = (title: string, kind: "task" | "event" | "reminder" | "note", items: Entry[]) => {
+    return (
+      <section>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="font-semibold text-[var(--color-text-primary)] capitalize">{title}</h3>
+          <button 
+            onClick={() => setActiveForm(kind)}
+            className="text-[var(--color-accent)] text-lg leading-none pb-1 px-2 hover:bg-[var(--color-canvas-bg)] rounded"
+          >
+            +
+          </button>
+        </div>
+        
+        {activeForm === kind && (
+          <div className="mb-3 flex gap-2">
+            <input 
+              autoFocus
+              className="flex-1 bg-[var(--color-canvas-bg)] border border-[var(--color-border)] rounded px-3 py-1.5 text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
+              placeholder={`New ${kind}...`}
+              value={newTitle}
+              onChange={e => setNewTitle(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') handleAddEntry(kind);
+                if (e.key === 'Escape') { setActiveForm(null); setNewTitle(""); }
+              }}
+            />
+            <button 
+              onClick={() => handleAddEntry(kind)}
+              className="px-3 py-1.5 bg-[var(--color-accent)] text-white text-sm rounded hover:opacity-90"
+            >
+              Add
+            </button>
+          </div>
+        )}
+
+        {items.length === 0 ? (
+          <div className="p-3 border border-dashed border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-secondary)] text-center">
+            No {title.toLowerCase()}
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {items.map(entry => (
+              <li key={entry.id} className="flex items-start gap-3 p-3 bg-[var(--color-canvas-bg)] border border-[var(--color-border)] rounded-lg group">
+                {kind === 'task' && (
+                  <button 
+                    onClick={() => toggleEntryStatus(entry.id, entry.status)}
+                    className={`mt-0.5 w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center
+                      ${entry.status === 'done' ? 'bg-[var(--color-accent)] border-[var(--color-accent)]' : 'border-[var(--color-border)] hover:border-[var(--color-accent)]'}
+                    `}
+                  >
+                    {entry.status === 'done' && <div className="w-2 h-2 bg-white rounded-sm" />}
+                  </button>
+                )}
+                
+                <div className={`flex-1 text-sm ${entry.status === 'done' ? 'text-[var(--color-text-secondary)] line-through' : 'text-[var(--color-text-primary)]'}`}>
+                  {entry.title}
+                </div>
+                
+                <button 
+                  onClick={() => deleteEntry(entry.id)}
+                  className="opacity-0 group-hover:opacity-100 text-[var(--color-text-secondary)] hover:text-red-500 transition-opacity px-1"
+                  title="Delete"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    );
+  };
+
   return (
     <aside className="w-80 flex-shrink-0 bg-[var(--color-panel-bg)] border-l border-[var(--color-border)] p-6 overflow-y-auto">
       <div className="mb-8">
@@ -53,46 +179,11 @@ const InspectorRegion: React.FC<InspectorProps> = ({ selectedDate, onGoToToday }
         Go to Today
       </button>
 
-      <div className="space-y-6">
-        <section>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-[var(--color-text-primary)]">Tasks</h3>
-            <button className="text-[var(--color-accent)] text-sm">+</button>
-          </div>
-          <div className="p-3 border border-dashed border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-secondary)] text-center">
-            No tasks yet
-          </div>
-        </section>
-
-        <section>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-[var(--color-text-primary)]">Events</h3>
-            <button className="text-[var(--color-accent)] text-sm">+</button>
-          </div>
-          <div className="p-3 border border-dashed border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-secondary)] text-center">
-            No events
-          </div>
-        </section>
-
-        <section>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-[var(--color-text-primary)]">Reminders</h3>
-            <button className="text-[var(--color-accent)] text-sm">+</button>
-          </div>
-          <div className="p-3 border border-dashed border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-secondary)] text-center">
-            No reminders
-          </div>
-        </section>
-
-        <section>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-[var(--color-text-primary)]">Notes</h3>
-            <button className="text-[var(--color-accent)] text-sm">+</button>
-          </div>
-          <div className="p-3 border border-dashed border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-secondary)] text-center">
-            No notes for this day
-          </div>
-        </section>
+      <div className="space-y-6 pb-20">
+        {renderSection("Tasks", "task", tasks)}
+        {renderSection("Events", "event", events)}
+        {renderSection("Reminders", "reminder", reminders)}
+        {renderSection("Notes", "note", notes)}
       </div>
     </aside>
   );
